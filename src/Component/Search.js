@@ -42,6 +42,10 @@ export default class Search extends Component {
             alert("Please Enter Product")
         }
         else {
+            this.setState({
+                Input: false,
+                searchValue: '',
+            })
             this.props.navigation.navigate('ProductList')
         }
     }
