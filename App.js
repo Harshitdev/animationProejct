@@ -17,6 +17,9 @@ import {
   Text,
   StatusBar,
   TouchableOpacity,
+  Animated,
+  Easing,
+  TouchableWithoutFeedback
 } from 'react-native';
 
 import {
@@ -41,19 +44,74 @@ const Pizza = require('./src/image/pizza.png')
 export default class App extends Component {
   constructor(props) {
     super(props);
+    this.animatedValue = new Animated.Value(0)
+    this.animatedValue1 = new Animated.Value(0)
+    this.animatedValue2 = new Animated.Value(0)
+    this.animatedValue3 = new Animated.Value(0)
+
     this.state = {
       ActiveTab: 'Rating',
       showFirst: false,
       showSecond: false,
       showthird: false,
+      animationValue3: new Animated.Value(180),
+
     }
   }
+  toggleAnimation = () => {
+
+    if (this.state.viewState == true) {
+      Animated.timing(this.state.animationValue, {
+        toValue: 300,
+        timing: 1500
+      }).start(() => {
+        this.setState({ viewState: false })
+      });
+    }
+    else {
+      Animated.timing(this.state.animationValue, {
+        toValue: 180,
+        timing: 1500
+      }).start(this.setState({ viewState: true })
+      );
+    }
+  }
+
+  animate() {
+    this.animatedValue.setValue(0)
+    this.animatedValue1.setValue(0)
+    this.animatedValue2.setValue(0)
+    this.animatedValue3.setValue(0)
+    const createAnimation = function (value, duration, easing, delay = 0) {
+      return Animated.timing(
+        value,
+        {
+          toValue: 1,
+          duration,
+          easing,
+          delay
+        }
+      )
+    }
+    Animated.parallel([
+      createAnimation(this.animatedValue1, 200, Easing.ease),
+      createAnimation(this.animatedValue, 200, Easing.linear),
+      createAnimation(this.animatedValue2, 200, Easing.linear),
+      createAnimation(this.animatedValue3, 200, Easing.linear),
+    ]).start()
+
+  }
+
+  componentDidMount() {
+  }
+
   TabSelect(value) {
     this.setState({
       ActiveTab: value
     })
   }
   SelectProduct() {
+    this.animate();
     this.setState({
       showFirst: !this.state.showFirst,
       showSecond: false,
@@ -76,6 +134,38 @@ export default class App extends Component {
   }
 
   render() {
+
+    const scaleText = this.animatedValue1.interpolate({
+      inputRange: [0, 0.6, 1],
+      outputRange: [0, 0.6, 1]
+    })
+
+    const height = this.animatedValue2.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: [85, 100, 120]
+    })
+
+    const heightRev = this.animatedValue2.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: [120, 100, 85]
+    })
+    const opacity = this.animatedValue.interpolate({
+      inputRange: [0, 0.2, 0.4, 0.6, 0.8, 1],
+      outputRange: [0, 0.2, 0.4, 0.6, 0.8, 1]
+    })
+    const opacityBT = this.animatedValue3.interpolate({
+      inputRange: [0, 0.2, 0.4, 0.6, 0.8, 1],
+      outputRange: [0, 0.2, 0.4, 0.6, 0.8, 1]
+    })
+
+    const opacityButton = this.animatedValue3.interpolate({
+      inputRange: [0, 0.2, 0.4, 0.6, 0.8, 1],
+      outputRange: [0, 0, 0, 0.7, 0.8, 1]
+    })
+    const heightButton = this.animatedValue3.interpolate({
+      inputRange: [0, 0.2, 0.4, 0.6, 0.8, 1],
+      outputRange: [0, 5, 10, 15, 25, 30]
+    })
 
     return (
 
@@ -129,55 +219,68 @@ export default class App extends Component {
 
         </View>
         <ScrollView >
-          <View style={styles.ListMainView}>
-            {!this.state.showFirst ? <TouchableOpacity onPress={() => this.SelectProduct()} style={styles.hideView}>
-              <View style={styles.productDetailView}>
-                <Image source={Dominos} style={styles.ShopIcon} />
-                <View style={styles.shopNameView}>
-                  <Text style={styles.shopName}>Papa Jhon's</Text>
-                  <Text style={styles.shopDistance}>0.5 mi</Text>
-                </View>
-              </View>
-              <View style={styles.hidePriceMainView}>
-                <Text style={styles.hidePriceAndOffText}>$</Text>
-                <Text style={styles.hideTextPrice}>20:00</Text>
-                <Text style={styles.hidePriceAndOffText}>OFF</Text>
-              </View>
-            </TouchableOpacity>
-              :
-              <TouchableOpacity onPress={() => this.SelectProduct()} style={styles.ShowView}>
+          <View style={[styles.ListMainView, { paddingBottom: 20 }]}>
+
+            {!this.state.showFirst ? <TouchableWithoutFeedback
+              onPress={() => this.SelectProduct()}
+              style={[styles.hideView]}>
+              <Animated.View style={[styles.hideView, { height: heightRev }]}>
+
                 <View style={styles.productDetailView}>
-                  <View style={{ alignItems: 'center' }}>
-                    <Image source={Dominos} style={styles.ShopIcon} />
+                  <Image source={Dominos} style={styles.ShopIcon} />
+                  <View style={styles.shopNameView}>
+                    <Text style={styles.shopName}>Papa Jhon's</Text>
                     <Text style={styles.shopDistance}>0.5 mi</Text>
                   </View>
+                </View>
+                <View style={styles.hidePriceMainView}>
+                  <Text style={styles.hidePriceAndOffText}>$</Text>
+                  <Text style={styles.hideTextPrice}>20:00</Text>
+                  <Text style={styles.hidePriceAndOffText}>OFF</Text>
+                </View>
+              </Animated.View>
+            </TouchableWithoutFeedback>
+              :
+              <TouchableWithoutFeedback onPress={() => this.SelectProduct()} style={styles.ShowView}>
+                <Animated.View style={[styles.ShowView, { opacity, height }]}>
 
-                  <View style={styles.shopNameView}>
-                    <View style={styles.showPriceMainView}>
-                      <Text style={styles.ShowPriceAndOffText}>$</Text>
-                      <Text style={styles.ShowTextPrice}>20:00</Text>
-                      <Text style={styles.ShowPriceAndOffText}>OFF</Text>
+                  <View style={styles.productDetailView}>
+                    <View style={{ alignItems: 'center' }}>
+                      <Image source={Dominos} style={styles.ShopIcon} />
+                      <Text style={styles.shopDistance}>0.5 mi</Text>
                     </View>
-                    <View style={styles.showPriceMainView}>
-                      <Text style={styles.showPTS}>99% value - 10 pts</Text>
-                    </View>
-                    <View style={styles.showTimer}>
-                      <Text style={styles.showTimerText}>02 : 07 : 20</Text>
 
+                    <View style={styles.shopNameView}>
+                      <View style={styles.showPriceMainView}>
+                        <Text style={styles.ShowPriceAndOffText}>$</Text>
+                        <Text style={styles.ShowTextPrice}>20:00</Text>
+                        <Text style={styles.ShowPriceAndOffText}>OFF</Text>
+                      </View>
+                      <View style={styles.showPriceMainView}>
+                        <Text style={styles.showPTS}>99% value - 10 pts</Text>
+                      </View>
+                      <Animated.View style={[styles.showTimer, { opacity: opacityButton, height: heightButton }]}>
+                        <Text style={[styles.showTimerText]}>02 : 07 : 20</Text>
+
+                      </Animated.View>
                     </View>
                   </View>
-                </View>
-                <View style={styles.showImageMainView}>
-                  <Image source={Pizza} style={styles.showProductImage} />
-                </View>
-                <View style={styles.plusMainView}>
-                  <Image source={Plus} style={styles.plusIcon} />
-                </View>
-              </TouchableOpacity>}
+                  {/* <Animated.View
+                    style={[styles.showImageMainView, { transform: [{ scale: scaleText }] }]}> */}
+                  <View
+                    style={[styles.showImageMainView,]}>
+                    <Image source={Pizza} style={styles.showProductImage} />
+                  </View>
+                  {/* </Animated.View> */}
+                  {/* <View style={styles.plusMainView}>
+                    <Image source={Plus} style={styles.plusIcon} />
+                  </View> */}
+                </Animated.View>
+              </TouchableWithoutFeedback>}
           </View>
 
           {/* ==========Second======== */}
-          <View style={styles.ListMainView}>
+          <View style={[styles.ListMainView, { marginTop: -10 }]}>
             {!this.state.showSecond ? <TouchableOpacity onPress={() => this.SelectSecondProduct()} style={styles.hideView}>
               <View style={styles.productDetailView}>
                 <Image source={Dominos} style={styles.ShopIcon} />
@@ -395,7 +498,7 @@ const styles = StyleSheet.create({
     height: '100%'
   },
   ListMainView: {
-    paddingTop: 40,
+    paddingTop: 20,
     alignItems: 'center',
     textAlign: 'center',
     backgroundColor: '#EBF5FB'
@@ -475,11 +578,10 @@ const styles = StyleSheet.create({
     position: 'relative',
     justifyContent: 'space-between',
     backgroundColor: '#fff',
-    height: 120,
     width: 370,
     borderTopLeftRadius: 30,
     borderBottomEndRadius: 30,
-    marginBottom: 30,
+    marginBottom: 0,
     shadowColor: 'gray',
     shadowOffset: { width: 4, height: 4 },
     shadowOpacity: 0.7,
