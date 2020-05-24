@@ -48,33 +48,35 @@ export default class App extends Component {
     this.animatedValue1 = new Animated.Value(0)
     this.animatedValue2 = new Animated.Value(0)
     this.animatedValue3 = new Animated.Value(0)
+    this.animatedValueRev = new Animated.Value(0)
 
     this.state = {
       ActiveTab: 'Rating',
-      showFirst: false,
+      showFirst: null,
       showSecond: false,
       showthird: false,
       animationValue3: new Animated.Value(180),
 
     }
   }
-  toggleAnimation = () => {
 
-    if (this.state.viewState == true) {
-      Animated.timing(this.state.animationValue, {
-        toValue: 300,
-        timing: 1500
-      }).start(() => {
-        this.setState({ viewState: false })
-      });
+  reverseAnimate() {
+    this.animatedValueRev.setValue(0)
+    const createAnimation = function (value, duration, easing, delay = 0) {
+      return Animated.timing(
+        value,
+        {
+          toValue: 1,
+          duration,
+          easing,
+          delay
+        }
+      )
     }
-    else {
-      Animated.timing(this.state.animationValue, {
-        toValue: 180,
-        timing: 1500
-      }).start(this.setState({ viewState: true })
-      );
-    }
+    Animated.parallel([
+      createAnimation(this.animatedValueRev, 200, Easing.ease),
+    ]).start()
+
   }
 
   animate() {
@@ -111,7 +113,12 @@ export default class App extends Component {
     })
   }
   SelectProduct() {
-    this.animate();
+    if (!this.state.showFirst) {
+      this.animate();
+    }
+    else {
+      this.reverseAnimate();
+    }
     this.setState({
       showFirst: !this.state.showFirst,
       showSecond: false,
@@ -145,7 +152,7 @@ export default class App extends Component {
       outputRange: [85, 100, 120]
     })
 
-    const heightRev = this.animatedValue2.interpolate({
+    const heightRev = this.animatedValueRev.interpolate({
       inputRange: [0, 0.5, 1],
       outputRange: [120, 100, 85]
     })
@@ -218,13 +225,13 @@ export default class App extends Component {
           </TouchableOpacity>
 
         </View>
-        <ScrollView >
+        <ScrollView showsVerticalScrollIndicator={true} alwaysBounceVertical={true} >
           <View style={[styles.ListMainView, { paddingBottom: 20 }]}>
 
             {!this.state.showFirst ? <TouchableWithoutFeedback
               onPress={() => this.SelectProduct()}
               style={[styles.hideView]}>
-              <Animated.View style={[styles.hideView, { height: heightRev }]}>
+              <Animated.View style={[styles.hideView, { height: this.state.showFirst == null ? 85 : heightRev }]}>
 
                 <View style={styles.productDetailView}>
                   <Image source={Dominos} style={styles.ShopIcon} />
@@ -511,7 +518,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     backgroundColor: '#fff',
-    height: 85,
     width: 370,
     borderTopLeftRadius: 30,
     shadowColor: 'gray',
